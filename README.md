@@ -40,6 +40,54 @@ implied = round( tvl_usd x 0.25
 - **Chains** adds 0.02 per extra chain, up to x1.10: wider reach is worth a
   little more.
 
+## Methodology
+
+The board is built from one sealed snapshot and nothing else — no live
+lookups, no hand-picked names, no clock. The snapshot is DefiLlama's protocol
+index as of 2026-11-14 (758 protocols), and the program is deterministic: the
+same snapshot bytes in give the same board out, every run.
+
+**Choosing the candidates.** A protocol is a launch candidate when it records
+no token — no market cap, no CoinGecko id, no symbol — and is not a wrapped,
+staked or bridged product of a token that already trades. The watchlist is the
+floor: all 40 of its slugs are ranked. The early radar adds every other launch
+candidate below the $50M floor, which is why the board holds 222 rows instead
+of 40. Wrapped, staked and bridged products (120 of them) are set aside with
+their reason named, and live-token protocols are shown separately with their
+market caps as facts, not models.
+
+**Scoring.** Every candidate is scored by the radar-2 function above — TVL
+base, seven-day growth, age with no token, category, chain count — and ranked
+by implied value, with the slug as the tiebreak. Ranks run 1..222 with no gaps.
+Each row also carries an eight-step farm plan derived from the protocol's own
+record: the capital follows the TVL, the gas follows the chain, the hold
+follows the age. The dashboard recomputes every row's implied value from the
+snapshot figures and says whether it matches the board, so the page and the
+data are visibly the same arithmetic.
+
+**What this does not claim.** The honest limits, stated plainly:
+
+- "Records no token" is not "has none". The snapshot is a dated record; a
+  protocol may have launched a token since 2026-11-14, or the index may simply
+  not list one. The board ranks what the snapshot records, nothing more.
+- Implied value is this entry's own claim. It is a model built from TVL,
+  growth, age, category and chain count — not a price, not a prediction that a
+  token will launch, and not a prediction of what it would be worth if it did.
+- The category multiplier (x1.15 / x1.10 / x1.00) is a judgement, the one in
+  the model. It is small on purpose: TVL, growth and age still decide the
+  order, and changing it would shuffle the middle of the board, not the top.
+- Age is the time since the protocol was first listed in the index. A missing
+  listing date counts as 365 days, and a listing date is not proof of when a
+  protocol actually started.
+- Seven-day growth is one noisy week, clamped to -60% … +120% so a single
+  spike cannot dominate the ranking.
+- TVL is a snapshot figure. It moves daily and can be inflated by incentives;
+  a protocol that grows by paying for deposits scores the same as one that
+  grows on real use.
+- The farm plans are generic templates, not per-protocol research. They say
+  how to build a position, not that an airdrop will happen, and they never ask
+  anyone to pay to claim anything.
+
 ## What is set aside, and why
 
 A protocol that records no token is not always a launch candidate. Wrapped,

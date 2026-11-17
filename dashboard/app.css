@@ -122,6 +122,16 @@ tbody tr[data-selected="true"] { background: rgba(45, 212, 167, 0.1); }
 .pager span { color: var(--muted); font-size: 13px; margin-left: auto; }
 
 .model { margin-top: var(--step-4); padding: var(--step-5); display: grid; gap: var(--step-3); }
+.explainer { margin-bottom: var(--step-4); padding: var(--step-4); display: grid; gap: var(--step-3); }
+.explainer > p { max-width: 78ch; }
+.drivers { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--step-3); }
+.drivers li { border: 1px solid var(--border); border-radius: var(--radius-control); padding: var(--step-2) var(--step-3); display: grid; gap: var(--step-1); align-content: start; }
+.drivers b { font-size: 13px; }
+.drivers span { color: var(--muted); font-size: 12px; }
+.worked { border-top: 1px solid var(--border); padding-top: var(--step-3); display: grid; gap: var(--step-2); }
+.worked .equation { max-width: 680px; }
+.worked .total { border-top: 1px solid var(--border); padding-top: var(--step-2); }
+.worked .total b { color: var(--accent); }
 .formula { font-family: var(--font-num); font-size: 13px; line-height: 1.7; color: var(--muted); overflow-wrap: anywhere; }
 .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--step-3); }
 .tier { border: 1px solid var(--border); border-radius: var(--radius-control); padding: var(--step-3); }
@@ -164,6 +174,7 @@ tbody tr[data-selected="true"] { background: rgba(45, 212, 167, 0.1); }
   .facts { border-left: 0; border-top: 1px solid var(--border); padding-left: 0; padding-top: var(--step-4); }
   .field input { min-width: 0; width: 100%; }
   .tiers { grid-template-columns: 1fr; }
+  .drivers { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }

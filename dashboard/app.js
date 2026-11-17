@@ -327,6 +327,46 @@
     );
   }
 
+  // The explainer panel: the same model in plain English, with the five drivers and a
+  // worked example for the #1 protocol, computed live from the snapshot figures the
+  // page already holds. It sits above the table so a reader meets the method before
+  // the ranking, and every number in it is recomputed here, never typed in by hand.
+  function explainerPanel() {
+    var m = DATA.model;
+    var top = DATA.rows[0];
+    if (!top) return null;
+    var base = top.tvl_usd * m.base_multiple;
+    var growth = Math.min(m.growth_cap, Math.max(m.growth_floor, top.change_7d === null || top.change_7d === undefined ? 0 : top.change_7d));
+    var growthMult = 1 + (growth / 100) * m.growth_weight;
+    var age = top.age_days === null || top.age_days === undefined ? m.unknown_age_days : top.age_days;
+    var maturity = m.maturity_floor + (Math.min(Math.max(age, 0), m.maturity_days) / m.maturity_days) * m.maturity_range;
+    var recomputed = impliedOf(top, m);
+    var chainNote = top.chains.length + ' chain' + (top.chains.length === 1 ? '' : 's') + ' (' + top.chains.slice(0, 3).join(', ') + (top.chains.length > 3 ? ', and ' + (top.chains.length - 3) + ' more' : '') + ')';
+    return el('section', { class: 'panel explainer', 'aria-label': 'How the value is computed' },
+      el('h2', { text: 'How the value is computed' }),
+      el('p', { class: 'sub', text: 'Implied value starts with a protocol\u2019s TVL and adjusts it for five things. The same function scores every row, and the worked example below is computed live from the #1 protocol\u2019s own figures — no number in it is typed in by hand.' }),
+      el('ol', { class: 'drivers' },
+        el('li', null, el('b', { text: '1 · TVL base — \u00d7 ' + m.base_multiple }), el('span', { text: 'A quarter of the TVL — size sets the starting point.' })),
+        el('li', null, el('b', { text: '2 · Seven-day growth — weight ' + m.growth_weight }), el('span', { text: 'The week\u2019s change, clamped to ' + m.growth_floor + '% … +' + m.growth_cap + '%. Momentum lifts the base, shrinkage cuts it.' })),
+        el('li', null, el('b', { text: '3 · Age with no token — ' + m.maturity_floor + ' to 1.00' }), el('span', { text: 'Time since first listing, capped at ' + (m.maturity_days / 365) + ' years. Longer with no token means a launch would be worth more; unlisted counts as ' + m.unknown_age_days + ' days.' })),
+        el('li', null, el('b', { text: '4 · Category — \u00d7 ' + m.category_high + ' / \u00d7 ' + m.category_mid + ' / \u00d7 1.00' }), el('span', { text: 'Fee-capturing gets the top tier, vaults and staking the middle, the rest 1.00. A token that would share fees is worth more.' })),
+        el('li', null, el('b', { text: '5 · Chain count — +0.02 a chain, up to \u00d7 1.10' }), el('span', { text: 'Each chain past the first adds 0.02, capped after five. Wider reach is worth a little more.' }))
+      ),
+      el('div', { class: 'worked' },
+        el('h3', { text: 'Worked example — #1 ' + top.name }),
+        el('div', { class: 'equation' },
+          el('div', null, el('span', { text: 'TVL ' + fmtUsd(top.tvl_usd) + ' \u00d7 ' + m.base_multiple }), el('b', { class: 'num', text: fmtUsd(base) })),
+          el('div', null, el('span', { text: 'Seven-day growth ' + fmtPct(top.change_7d) + ' \u2192 \u00d7 ' + growthMult.toFixed(3) }), el('b', { class: 'num', text: fmtUsd(base * growthMult) })),
+          el('div', null, el('span', { text: 'Age ' + fmtAge(top.age_days) + ' with no token \u2192 \u00d7 ' + maturity.toFixed(3) }), el('b', { class: 'num', text: fmtUsd(base * growthMult * maturity) })),
+          el('div', null, el('span', { text: 'Category ' + (top.category || 'Other') + ' \u2192 \u00d7 ' + top.category_multiplier }), el('b', { class: 'num', text: fmtUsd(base * growthMult * maturity * top.category_multiplier) })),
+          el('div', null, el('span', { text: chainNote + ' \u2192 \u00d7 ' + top.chains_multiplier }), el('b', { class: 'num', text: fmtUsd(recomputed) })),
+          el('div', { class: 'total' }, el('span', { text: 'Implied value' }), el('b', { class: 'num', text: fmtUsd(top.implied_value_usd) }))
+        ),
+        el('p', { class: 'sub', text: 'The page recomputes this row as ' + fmtUsd(recomputed) + (recomputed === top.implied_value_usd ? ', the same number the board carries.' : ', which differs from the board — the data would be stale.') + ' Implied value is this entry\u2019s own estimate, not a price and not a promise that a token launches.' })
+      )
+    );
+  }
+
   var dialog = el('dialog', { class: 'detail', id: 'detail', 'aria-labelledby': 'detail-title' });
   dialog.addEventListener('close', function () { state.selected = null; writeHash(); });
 
@@ -387,7 +427,11 @@
     shell.appendChild(controls());
     if (state.tab === 'live') shell.appendChild(liveTable());
     else if (state.tab === 'set-aside') shell.appendChild(setAsidePanel());
-    else shell.appendChild(boardTable());
+    else {
+      var explainer = explainerPanel();
+      if (explainer) shell.appendChild(explainer);
+      shell.appendChild(boardTable());
+    }
     if (state.tab === 'pre-token') shell.appendChild(modelPanel());
     shell.appendChild(el('footer', { class: 'foot' },
       el('span', { text: 'Source: ' + DATA.source }),
